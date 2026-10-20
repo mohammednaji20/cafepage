@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<!-- =====================================================================
+     ☕ صفحة تعريفية لكافيه — فكرة "الكوب المفتوح"
+     ملف واحد فقط (HTML + CSS + JS) — بدون أي مكتبات خارجية
+     استثناء وحيد: خط Cairo من Google Fonts
+     اللغة: عربي | الاتجاه: RTL | تصميم Mobile-first متجاوب
+
+     💡 الفكرة التصميمية (خارج الصندوق):
+       1) الصفحة كلها بأسلوب "فاتورة ورقية" — كأن الزائر مسك فاتورة الكافيه
+       2) كوب قهوة كامل مرسوم بالـ CSS داخل الهيرو، مع بخار متحرك يطلع منه
+       3) شريط متحرك (Ticker) يلف فيه كلام داخلي
+       4) المنيو تفاعلي! تضغط "+" ينعرف بعناصر "الفاتورة" حية،
+          وزر الواتساب العائم يبعت الطلب كامل برسالة منسقة
+       5) شارة "مفتوح الآن / مسكر" تتحسب واقعياً من ساعات الدوام كل مرة
+       6) ختم دائري بيتحول حلّاق + شريط تقدم كتنفيذ عنده "الحصة" من الصفحة
+     ===================================================================== -->
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="صفحة تعريفية للكافيه: منيو تفاعلي، دوام، موقع، وطلب عبر واتساب." />
+  <title>كافيه — الصفحة التعريفية</title>
+
+  <!-- ============ الخط الخارجي الوحيد المسموح: Cairo ============ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================
+       (1) ⚙️ قسم الإعدادات — كل التعدين هنا. عدّل القيم فقط.
+       (الألوان كلها هنا — الأقسام كلها تقرأ من هالمتغيرات)
+       ========================================================= */
+    :root {
+
+      /* --- بيانات المحل (النصوص نفسها بتنطبق من JavaScript —
+             شوف إعدادات JS بأول قسم <script> تحت) --- */
+      --font-family: "Cairo", system-ui, sans-serif;
+
+      /* 🎨 الألوان الرئيسية */
+      --c-paper: #f7f0e4;          /* لون الورقة (خلفية عامة) */
+      --c-paper-2: #efe4d2;        /* درجة أغمق شوي للرقاقات */
+      --c-ink: #2f2016;            /* حبر القهوة — لون النص */
+      --c-coffee: #6b3f23;         /* بني القهوة — اللون الرئيسي */
+      --c-coffee-2: #4a2c18;       /* بني غامق للظلال العايمة */
+      --c-foam: #e4b07a;           /* كريم الفوم — لون التمييز */
+      --c-metal: #8a6a4f;          /* بني معدني خفيف أدق نقش */
+      --c-whatsapp: #25d366;       /* أخضر واتساب الرسمي */
+
+      /* ألوان إضافية (فُصلت عشان تبديل الوضع الليلي يقدر يقلبها):
+         --c-card: خلفية الكروت | --c-soft / --c-muted: نصوص ثانوية
+         --c-line-rgb / --c-paper-rgb: نفس الألوان بصيغة RGB للاستخدام في rgba() */
+      --c-card: #fffdf8;               /* كروت بيرق فاتحة */
+      --c-soft: #8a7a6d;               /* نص خفيف ثالث */
+      --c-muted: #6b5a4c;              /* نص متوسط */
+      --c-line-rgb: 107, 63, 35;       /* خطوط بني القهوة بصيغة RGB */
+      --c-paper-rgb: 247, 240, 228;    /* لون الورقة بصيغة RGB */
+
+      /* --- شكل عام --- */
+      --radius: 14px;
+      --shadow: 0 14px 34px rgba(47, 32, 22, .14);
+      --max-w: 1080px;
+      --ticker-sp: 22s;            /* سرعة دورة الشريط المتحرك (زمن الدورة) */
+    }
+
+    /* =========================================================
+       🌙 الوضع الليلي — تنقلب الورق شوكولاتة والبني يصير ذهبياً
+       يتفاعل من زر بالهيدر (يركب data-theme="dark" على وسم <html>).
+       نفس المتغيرات مع قيم مختلفة فقط — كله يتبدل ولا حاجة تعديل أي عنصر
+       ========================================================= */
+    [data-theme="dark"] {
+      --c-paper: #241a11;        /* ورق داكن مثل طاولة خشب غامقة */
+      --c-paper-2: #2e2216;      /* درجة أفتح قليلاً للتنويع بالليل */
+      --c-ink: #f2e7d5;          /* نص كريمي فاتح */
+      --c-coffee: #dcae7d;       /* بني ينقلب ذهبي دافئ */
+      --c-coffee-2: #efdbb9;     /* ذهبي فاتح للعناوين المهمة */
+      --c-foam: #96652f;         /* ذهبي داكن يوازن الخلفية الداكنة */
+      --c-metal: #b3a08b;
+      --c-card: #2c2114;         /* كروت داكنة */
+      --c-soft: #a8947f;
+      --c-muted: #c9b39a;        /* نص ثانوي بلون كريمي هادئ يتباعد عن الخلفية */
+      --c-line-rgb: 190, 150, 105;   /* خطوط ذهبية */
+      --c-paper-rgb: 36, 26, 17;     /* لون الورقة الداكنة بصيغة RGB */
+    }
+
+    /* =========================================================
+       (2) أساسيات الصفحة + خامة الورق الخفيفة
+       ========================================================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-family);
+      color: var(--c-ink);
+      line-height: 1.8;
+      /* خامة "رق ورقية" حية — نقاط خفيفة جداً + تدرج بني خفيف فوقها */
+      background-color: var(--c-paper);
+      background-image:
+        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(var(--c-line-rgb), .08), transparent),
+        radial-gradient(circle at 85% 110%, rgba(228, 176, 122, .14), transparent 40%);
+      overflow-x: hidden;      /* نمنع أي سكرول أفقي بالخطأ */
+    }
+
+    ::selection { background: var(--c-foam); color: var(--c-ink); }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-w);
+      margin-inline: auto;
+      padding-inline: 18px;
+    }
+
+    /* =========================================================
+       (3) شريط تقدم الصفحة — "الحصة" تسير بزرقة
+       (شريط ثابت أعلى الصفحة بيتشرح بيتقدم مع التمرير)
+       ========================================================= */
+    #progress {
+      position: fixed;
+      top: 0; right: 0;      /* يمين لأن الصفحة RTL */
+      height: 5px;
+      width: 0%;              /* يتحدث من JavaScript */
+      background: linear-gradient(90deg, var(--c-foam), var(--c-coffee));
+      z-index: 200;
+      border-radius: 0 0 0 6px;
+    }
+
+    /* =========================================================
+       (4) الهيدر — شريط ورقي بسيط + شعار ختم شكل
+       ========================================================= */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(var(--c-paper-rgb), .88); /* شفافية خفيفة عشان يبين ورقي */
+      backdrop-filter: blur(6px);            /* ضباب خفيف خلفه (تأثير حديث) */
+      border-bottom: 2px dashed rgba(var(--c-line-rgb), .35); /* خط متقطع مثل الخيط */
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-block: 12px;
+    }
+
+    /* الشعار: دائرة ختم فيها الحرف الأول + الاسم جباها */
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+
+    .brand-seal {
+      width: 40px; height: 40px;
+      border: 3px solid var(--c-coffee);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      color: var(--c-coffee);
+      font-size: 1.1rem;
+      transform: rotate(-8deg);   /* ميل خفيف كأنه ختم مسك بالورقة */
+      background: var(--c-paper-2);
+    }
+
+    .brand-name { font-size: 1.1rem; color: var(--c-coffee-2); }
+
+    /* شارة حالة "مفتوح الآن" في الهيدر — تنطبق من JS */
+    .open-badge {
+      font-size: .8rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 2px solid currentColor;
+      white-space: nowrap;
+    }
+
+    .open-badge.is-open  { color: #1e7d43; }  /* أخضر غامق */
+    .open-badge.is-closed{ color: #b23b2e; }  /* طيني أحمر */
+
+    /* نقطة نبض بجانب نص الحالة */
+    .open-badge::before {
+      content: "● ";
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: .25; }
+    }
+
+    /* =========================================================
+       (5) الشريط المتحرك (Ticker) — كلام لف بيقطاوي
+       (النص نفسه بيتكرر من JavaScript — شوف قسم JS)
+       ========================================================= */
+    .ticker {
+      overflow: hidden;
+      background: var(--c-coffee);
+      color: var(--c-paper);
+      font-weight: 800;
+      font-size: .9rem;
+      padding-block: 10px;
+      white-space: nowrap;
+      border-block: 3px solid var(--c-coffee-2);
+      user-select: none;    /* ما ينفاد المستخدم الكلام وهو مرور */
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      gap: 0;
+      animation: slide var(--ticker-sp) linear infinite; /* دورة مستمرة */
+    }
+
+    /* الشريط بيتحرك بالقوة من اليسار... النص هو نسختين عشان تنقطع بدون كنيسة */
+    @keyframes slide {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .ticker-track span { padding-inline: 18px; }
+
+    /* =========================================================
+       (6) الهيرو — كوب قهوة كامل مرسوم بـ CSS + بخار حي
+       📷 [بديل الصورة]: الكوب هنا رسم CSS. لو بدك صورة حقيقية
+          حطها عنوان خلفية بديلة داخل .hero-stage بدل التدرجات.
+       ========================================================= */
+    .hero {
+      padding: 60px 0 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* منصة الهيرو: "صورة" مطولة مطبوعة ورقية — مثل بولارويد مسك بقطعتين شريط */
+    .hero-stage {
+      max-width: 620px;
+      margin: 0 auto 30px;
+      padding: 28px 20px 24px;
+      background: linear-gradient(145deg, #fff9ef, var(--c-paper-2));
+      border: 1px solid rgba(var(--c-line-rgb), .15);
+      box-shadow: var(--shadow);
+      border-radius: 4px;                 /* زوايا شبه مستقيمة كأجل ورقة */
+      transform: rotate(-1.5deg);         /* ميل خفيف كأنها مطروحة على طاولة */
+      position: relative;
+    }
+
+    /* "شريط" حبر ورقي مقمس بالأعلى (بدل صورة) + قطع شريط لاصق */
+    .hero-stage::before,
+    .hero-stage::after {
+      content: "";
+      position: absolute;
+      width: 90px; height: 28px;
+      background: rgba(228, 176, 122, .55);   /* لون كريم الفوم شفاف */
+      border: 1px dashed rgba(var(--c-line-rgb), .3);
+      top: -14px;
+      transform: rotate(-6deg);
+    }
+
+    .hero-stage::before { right: 18%; }
+    .hero-stage::after  { left: 18%; transform: rotate(5deg); }
+
+    /* 🎬 الكوب: مرسوم كلياً بالوضع CSS — لما الورقة داكنة يبين الظل */
+    .cup-scene {
+      width: 220px;
+      margin: 0 auto;
+      position: relative;
+      height: 200px;
+    }
+
+    /* ☁️ البخار: 3 فصوص عمودية بترتفع وبفتفي وبموج */
+    .steam {
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 44px;
+      border-radius: 8px;
+      background: linear-gradient(to top, rgba(var(--c-line-rgb), 0), rgba(138, 106, 79, .55));
+      filter: blur(5px);
+      animation: steam 2.6s ease-in-out infinite;
+    }
+
+    .steam:nth-child(1) { right: 92px; animation-delay: 0s; }
+    .steam:nth-child(2) { right: 106px; animation-delay: .6s; }
+    .steam:nth-child(3) { right: 120px; animation-delay: 1.2s; }
+
+    @keyframes steam {
+      0%   { transform: translateY(6px) scaleX(1) rotate(2deg);  opacity: 0; }
+      35%  { opacity: .9; }
+      100% { transform: translateY(-46px) scaleX(2.4) rotate(-6deg); opacity: 0; }
+    }
+
+    /* كوب قهوة: مستطيل مع وردة بأسفل (border-radius) */
+    .cup {
+      position: absolute;
+      bottom: 34px;
+      right: 70px;
+      width: 80px;
+      height: 66px;
+      border: 6px solid var(--c-coffee);
+      border-top-color: var(--c-coffee-2);
+      border-radius: 6px 6px 34px 34px;
+      background: linear-gradient(to bottom, #fff 0 14px, #b8794a 14px 100%); /* فوم بني فوق، قهوة تحت */
+      box-shadow: inset 0 -6px 12px rgba(74, 44, 24, .25);
+    }
+
+    /* لرف الكوب: دائرة صغيرة بعيد يمينه */
+    .cup::after {
+      content: "";
+      position: absolute;
+      left: -26px;
+      top: 14px;
+      width: 22px;
+      height: 22px;
+      border: 6px solid var(--c-coffee);
+      border-radius: 50%;
+      border-left-color: transparent;  /* نص الدائرة عشان شكل "لرف" */
+      background: transparent;
+    }
+
+    /* صحن تحت الكوب: قطع ناقص (ellipse) */
+    .saucer {
+      position: absolute;
+      bottom: 18px;
+      right: 42px;
+      width: 140px;
+      height: 24px;
+      border: 5px solid var(--c-coffee);
+      border-radius: 50%;
+      background: var(--c-paper-2);
+    }
+
+    /* حروف عائمة خفيفة خلف الكوب كديكور (بدل صورة) */
+    .cup-deco {
+      position: absolute;
+      font-weight: 900;
+      color: rgba(var(--c-line-rgb), .12);
+      font-size: 2.4rem;
+      user-select: none;
+    }
+    .cup-deco.d1 { top: 30px;  right: 6px;  transform: rotate(-14deg); }
+    .cup-deco.d2 { bottom: 40px; left: 0;    transform: rotate(10deg); }
+
+    /* نص الهيرو */
+    .hero h1 {
+      font-size: clamp(2rem, 7vw, 3.4rem);
+      font-weight: 900;
+      color: var(--c-coffee-2);
+      letter-spacing: -.5px;
+    }
+
+    /* خط تتحته موجة (SVG inline صغير — بدون مكتبات) */
+    .hero-wave { margin: 6px auto 14px; display: block; color: var(--c-foam); }
+
+    .hero p {
+      max-width: 540px;
+      margin: 0 auto 26px;
+      color: var(--c-muted);
+      font-size: 1.02rem;
+    }
+
+    /* أزرار الهيرو: الرئيسي (واتساب) + ثانوي (تنقل للمنيو) */
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 30px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .btn:hover  { transform: translateY(-3px); }
+    .btn:active { transform: translateY(0) scale(.97); }
+
+    .btn-wa {
+      background: var(--c-whatsapp);
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(37, 211, 102, .35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--c-coffee);
+      border: 2px dashed var(--c-coffee);  /* متقطع كأجل طابع الخمسيات */
+    }
+
+    /* =========================================================
+       (7) قسم "نبذة عنّا" — عمودان + ختم دائري بيتحول حلّاق
+       📷 [بديل الصورة]: مستطيل الميل بأسفل — حط هنا صورة القصة
+          (واجهة المحل أو صورة الفريق) كخلفية بدل خامة الشريط.
+       ========================================================= */
+    .about { padding: 56px 0; }
+
+    .section-title {
+      font-size: clamp(1.5rem, 5vw, 2.1rem);
+      font-weight: 900;
+      color: var(--c-coffee-2);
+      position: relative;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    /* تعليقة تحتها: خط سميك منبسط كقلم مسك */
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 2px;
+      right: 0;
+      width: 100%;
+      height: 10px;
+      background: var(--c-foam);
+      opacity: .45;
+      z-index: -1;
+      border-radius: 4px;
+      transform: rotate(-1deg);   /* ميل خفيف كأن النقدية مسكها */
+    }
+
+    .section-sub { color: var(--c-muted); margin-bottom: 26px; font-size: .95rem; }
+
+    .about-grid {
+      display: grid;
+      gap: 26px;
+      align-items: center;
+    }
+
+    /* 📷 [هنا تضع صورة القصة] — مؤقتاً خامة شريط + ختم دائري بيتحول حلّاق فوق رأسها */
+    .about-media {
+      min-height: 240px;
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 25% 20%, rgba(228, 176, 122, .55), transparent 55%),
+        repeating-linear-gradient(45deg,
+          var(--c-paper-2) 0 14px,
+          var(--c-paper) 14px 28px);      /* نصل ورقي منحرف كأنه قماش منديل */
+      border: 1px solid rgba(var(--c-line-rgb), .18);
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* الختم الدائري الذي يدور: نص مكتوب على دائرة (SVG textPath) */
+    .stamp {
+      width: 130px; height: 130px;
+      animation: spin 14s linear infinite;   /* يلّف دورة كاملة كل 14 ثانية */
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .stamp text {
+      font-weight: 800;
+      font-size: 11.5px;
+      fill: var(--c-coffee);
+      letter-spacing: 1px;
+    }
+
+    .stamp-center { fill: var(--c-foam); }
+    .stamp-ring   { fill: none; stroke: var(--c-coffee); stroke-width: 3; }
+
+    /* تعليق الصورة في زرة الصورة (كأنها كشكول نصي) */
+    .media-note {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(var(--c-paper-rgb), .92);
+      border: 1px dashed var(--c-metal);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--c-metal);
+    }
+
+    .about-content p { color: var(--c-muted); margin-bottom: 14px; }
+
+    /* كروت المميزات: نصل شكل فناجين صغيرة */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);  /* 2 عمودين موبايل */
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .feature {
+      background: var(--c-card);
+      border: 1px solid rgba(var(--c-line-rgb), .14);
+      border-radius: var(--radius);
+      padding: 14px 10px;
+      text-align: center;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-4px) rotate(-1deg);   /* يرتد قليلاً عند مرور المؤشر */
+      box-shadow: var(--shadow);
+    }
+
+    .feature b { display: block; color: var(--c-coffee); }
+    .feature small { color: var(--c-soft); font-size: .78rem; }
+
+    /* =========================================================
+       (8) قسم المنيو — "الفاتورة الحية" 🧾
+       الفكرة: القائمة كلها موضوع بورقة فاتورة، وكل صنف زر أضف.
+       لما تضيق السلة، ما بينها خط ويجوع مجموع الحساب —
+       وزر الواتساب العائم يبعتها كلها برسالة منسقة.
+       ========================================================= */
+    .menu { padding: 56px 0; position: relative; }
+
+    /* الورقة نفسها: تديدة حواف سمفرونة بأسفل (مثل نهاية الفاتورة المقطوعة) */
+    .receipt {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--c-card);
+      box-shadow: var(--shadow);
+      padding: 28px 22px 34px;
+      position: relative;
+      border-top: 3px solid var(--c-coffee);
+    }
+
+    /* الأسنان (الزغزة) بأسفل ورقة الفاتورة — معادلة تدرجات عمدودين */
+    .receipt::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      right: 0;
+      width: 100%;
+      height: 12px;
+      background:
+        linear-gradient(45deg,  transparent 70.7%, var(--c-card) 70.7%) 0 0 / 22px 12px repeat-x,
+        linear-gradient(-45deg, transparent 70.7%, var(--c-card) 70.7%) 11px 0 / 22px 12px repeat-x;
+      filter: drop-shadow(0 3px 2px rgba(47, 32, 22, .12));
+    }
+
+    /* عنوان الفاتورة: مثل مطبوع فاتورة حقيقي */
+    .receipt-head {
+      text-align: center;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 2px dashed rgba(var(--c-line-rgb), .35);
+    }
+
+    .receipt-head h2 { font-size: 1.5rem; font-weight: 900; color: var(--c-coffee-2); }
+    .receipt-head p { font-size: .82rem; color: var(--c-soft); }
+
+    /* صف صنف: اسم + سعر + زر أضف */
+    .menu-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding-block: 12px;
+      border-bottom: 1px dashed rgba(var(--c-line-rgb), .22);
+    }
+
+    .menu-row-info { flex: 1; }
+    .menu-row-info h3 { font-size: 1rem; font-weight: 800; }
+    .menu-row-info p { font-size: .82rem; color: var(--c-soft); }
+
+    .menu-row-price {
+      font-weight: 900;
+      color: var(--c-coffee);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums; /* أرقام بعرض متساوي كأجل فاتورة */
+    }
+
+    /* زر أضف: دائري صغير + ينقل (+) لما يصير بالسلة */
+    .add-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--c-coffee);
+      background: transparent;
+      color: var(--c-coffee);
+      font-size: 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: transform .15s ease, background .15s ease, color .15s ease;
+    }
+
+    .add-btn:hover  { background: var(--c-coffee); color: #fff; transform: scale(1.12) rotate(8deg); }
+    .add-btn:active { transform: scale(.9); }
+
+    /* صف مجموع السلة بأسفل الفاتورة (يظهر لما تضيف شي) */
+    .receipt-total {
+      display: none;              /* إخفاء افتراضي — JS يفرجه لما تمنح */
+      justify-content: space-between;
+      padding-top: 14px;
+      margin-top: 4px;
+      font-weight: 900;
+      font-size: 1.05rem;
+      color: var(--c-coffee-2);
+    }
+
+    .receipt-total.show { display: flex; }
+
+    .cart-empty-hint {
+      text-align: center;
+      font-size: .84rem;
+      color: var(--c-soft);
+      margin-top: 14px;
+      padding: 10px;
+      border: 1px dashed rgba(var(--c-line-rgb), .3);
+      border-radius: 8px;
+      background: rgba(228, 176, 122, .12);
+    }
+
+    /* =========================================================
+       (9) ساعات الدوام والموقع — كرتين
+       📷 [بديل صورة الخريطة]: تحتها مربع شبكي بنقط — حط صورة
+          الخريطة أو صورة مدخل المحل كخلفية بدل النمط.
+       ========================================================= */
+    .location { padding: 56px 0; }
+
+    .location-grid { display: grid; gap: 16px; }
+
+    .loc-card {
+      background: var(--c-card);
+      border: 1px solid rgba(var(--c-line-rgb), .14);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+    }
+
+    .loc-card h3 {
+      color: var(--c-coffee-2);
+      font-weight: 900;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .loc-card p { color: var(--c-muted); }
+    .loc-card small { color: var(--c-soft); display: block; margin-top: 6px; }
+
+    .loc-card a {
+      color: var(--c-coffee);
+      font-weight: 800;
+      text-decoration: none;
+      border-bottom: 2px dashed var(--c-foam);
+    }
+
+    /* مربع الخريطة التجريبي: نقش شبكة نقاط (بدل صورة) */
+    .map-ph {
+      margin-top: 16px;
+      min-height: 170px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(var(--c-line-rgb), .18);
+      background:
+        radial-gradient(circle, rgba(var(--c-line-rgb), .18) 1.5px, transparent 1.6px) 0 0 / 18px 18px;
+      display: grid;
+      place-items: center;
+      color: var(--c-metal);
+      font-weight: 700;
+      font-size: .85rem;
+      text-align: center;
+      padding: 14px;
+    }
+
+    /* =========================================================
+       (10) زر الواتساب العائم + درج السلة 🛒
+       الزر ثابت أسفل يسار، وفوقه درج ينفتح فيه:
+         - الأصناف التي أضفتها (+/- لتغيير الكمية)
+         - المجموع
+         - زر "أرسل الطلب عبر واتساب" (يبعت رسالة منسقة)
+       لو السلة فايتة: الزر يبعت رسالة استفسار عامة.
+       ========================================================= */
+    .wa-float {
+      position: fixed;
+      bottom: 22px;
+      left: 20px;             /* يسار في RTL عشان ما يغطي شريط التمرير */
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      background: var(--c-whatsapp);
+      color: #fff;
+      display: grid; place-items: center;
+      text-decoration: none;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .28);
+      z-index: 120;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform .18s ease;
+    }
+
+    .wa-float:hover { transform: scale(1.08); }
+
+    .wa-float svg { width: 30px; height: 30px; fill: currentColor; }
+
+    /* شارة عداد السلة — رقم أحمر فوق الزر */
+    .cart-badge {
+      position: absolute;
+      top: -4px; right: -4px;
+      min-width: 24px; height: 24px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #d9482f;
+      color: #fff;
+      font-size: .8rem;
+      font-weight: 900;
+      display: none;               /* مخفية لما السلة فاضية */
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--c-paper);
+    }
+
+    .cart-badge.show { display: inline-flex; }
+    .cart-badge.bump { animation: bump .4s ease; }  /* نبضة لما تضيف صنف */
+
+    @keyframes bump {
+      0% { transform: scale(1); } 40% { transform: scale(1.5); } 100% { transform: scale(1); }
+    }
+
+    /* خلفية معتمة خلف درج السلة (تضغط عليها يقفل) */
+    .cart-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(47, 32, 22, .4);
+      opacity: 0;
+      pointer-events: none;    /* ما تستقبل نقار لما مخفية */
+      transition: opacity .25s ease;
+      z-index: 130;
+    }
+
+    .cart-backdrop.show { opacity: 1; pointer-events: auto; }
+
+    /* درج السلة: يطلع من تحت من ناحية الزر (يسار) */
+    .cart-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: min(400px, 100%);
+      max-height: 80vh;
+      background: var(--c-paper);
+      border-radius: 18px 18px 0 0;
+      border: 2px solid var(--c-coffee);
+      border-bottom: none;
+      box-shadow: 0 -12px 40px rgba(47, 32, 22, .3);
+      z-index: 140;
+      transform: translateY(105%);         /* مخفي تحت */
+      transition: transform .32s cubic-bezier(.3, 1.2, .4, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-drawer.open { transform: translateY(0); }   /* يطلع */
+
+    .cart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 2px dashed rgba(var(--c-line-rgb), .3);
+    }
+
+    .cart-head h3 { font-weight: 900; color: var(--c-coffee-2); }
+
+    .cart-close {
+      border: none;
+      background: transparent;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--c-coffee);
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    /* جسم الدرج: لستة الأصناف */
+    .cart-body {
+      padding: 14px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-block: 10px;
+      border-bottom: 1px dashed rgba(var(--c-line-rgb), .18);
+      font-size: .92rem;
+    }
+
+    .cart-item-name { flex: 1; font-weight: 700; }
+
+    .qty-controls { display: flex; align-items: center; gap: 8px; }
+
+    .qty-btn {
+      width: 26px; height: 26px;
+      border-radius: 8px;
+      border: 1.5px solid var(--c-coffee);
+      background: transparent;
+      color: var(--c-coffee);
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    .qty-btn:hover { background: var(--c-coffee); color: #fff; }
+
+    .cart-item-sum { font-weight: 900; color: var(--c-coffee); white-space: nowrap; }
+
+    /* حالة السلة الفاضية */
+    .cart-empty {
+      text-align: center;
+      padding: 30px 10px;
+      color: var(--c-soft);
+      font-size: .9rem;
+    }
+
+    .cart-empty span { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+    /* تذييل الدرج: المجموع + زر الإرسال */
+    .cart-footer {
+      padding: 14px 20px 18px;
+      border-top: 2px dashed rgba(var(--c-line-rgb), .3);
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 900;
+      font-size: 1.05rem;
+      color: var(--c-coffee-2);
+      margin-bottom: 12px;
+    }
+
+    .cart-send {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* =========================================================
+       (11) الفوتر
+       ========================================================= */
+    footer {
+      background: var(--c-coffee-2);
+      color: var(--c-paper);
+      text-align: center;
+      padding: 36px 0 42px;
+      margin-top: 40px;
+    }
+
+    footer .brand-seal {
+      border-color: var(--c-foam);
+      color: var(--c-foam);
+      background: transparent;
+      margin: 0 auto 12px;
+    }
+
+    footer .brand { justify-content: center; }
+
+    footer p { font-size: .85rem; opacity: .85; margin-top: 6px; }
+
+    /* =========================================================
+       (12) حركة الظهور عند التمرير (Scroll Reveal)
+       العناصر بعلامة .reveal تبدأ مخفية تحت شوي،
+       و JavaScript بفرجها لما تصل لعين المستخدم.
+       ========================================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(34px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.seen { opacity: 1; transform: none; }
+
+    /* =========================================================
+       (12.5) 🌗 الميزات الجديدة
+       أ) انتقال لطيف بين الوضع النهاري والليلي
+       ب) أزرار الهيدر الصغيرة (الصوت ☀️🌙)
+       ج) بطاقة الولاء 🎟️
+       د) رسالة في زجاجة 🍾
+       ========================================================= */
+
+    /* --- أ) انتقال ناعم بالألوان عند تبديل الوضع --- */
+    body, header, .receipt, .loc-card, .cart-drawer, .loyalty-card, .bottle-card, footer {
+      transition: background-color .45s ease, color .45s ease, border-color .45s ease;
+    }
+
+    /* --- ب) أزرار صغيرة دائرية بالهيدر (الصوت + الوضع الليلي) --- */
+    .header-tools { display: flex; align-items: center; gap: 8px; }
+
+    .hbtn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--c-coffee);
+      background: transparent;
+      color: var(--c-coffee);
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
+    }
+
+    .hbtn:hover  { background: var(--c-coffee); color: var(--c-card); transform: rotate(-8deg); }
+    .hbtn:active { transform: scale(.9); }
+    .hbtn.playing { background: var(--c-coffee); color: var(--c-card); animation: pulse 2.4s infinite; }
+
+    /* --- ج) بطاقة الولاء: كرت رسمي عليه مقبض قلوب؟ لا — أختام فناجين --- */
+    .loyalty { padding: 40px 0 30px; }
+
+    .loyalty-card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--c-card);
+      border: 2px dashed var(--c-coffee);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 26px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* لافتة صغيرة بزاوية الكرت مثل "مثبتة" */
+    .loyalty-card::before {
+      content: "عضوية";
+      position: absolute;
+      top: 12px;
+      left: -34px;              /* في RTL: يسار يعني التوضبع المعاكس */
+      transform: rotate(35deg);
+      background: var(--c-foam);
+      color: var(--c-coffee-2);
+      font-size: .68rem;
+      font-weight: 900;
+      padding: 3px 40px;
+      letter-spacing: 2px;
+    }
+
+    .loyalty-slots {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* موبايل: صفين وأكثر */
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-top: 6px;
+    }
+
+    /* كل خانة: إما فاضية (دائرة وهممة) أو مثبّتة فيها فنجان ☕ */
+    .loyalty-slot {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 2px dashed rgba(var(--c-line-rgb), .4);
+      border-radius: 12px;
+      font-size: 1.2rem;
+      transition: transform .2s ease, background .25s ease, border .25s ease;
+    }
+
+    .loyalty-slot.full {
+      border-style: solid;
+      border-color: var(--c-coffee);
+      background: rgba(var(--c-line-rgb), .12);
+    }
+
+    /* حركة "انفجار الفرحة" لما ينزل ختم جديد */
+    .loyalty-slot.pop { animation: pop .5s cubic-bezier(.25, 1.7, .4, 1); }
+
+    @keyframes pop {
+      0%   { transform: scale(.3) rotate(-40deg); }
+      60%  { transform: scale(1.35) rotate(10deg); }
+      100% { transform: none; }
+    }
+
+    .loyalty-status { color: var(--c-muted); font-size: .9rem; min-height: 1.6em; }
+
+    .loyalty-status.done {
+      font-weight: 900;
+      color: var(--c-coffee);
+      font-size: 1.05rem;
+    }
+
+    /* زر الاسترداد يظهر فقط لما البطاقة تكتمل */
+    .loyalty-redeem { display: none; margin-top: 14px; }
+    .loyalty-redeem.show { display: inline-flex; }
+
+    /* زر تفريغ البطاقة — أداة تجربة/تطوير، ممكن تحذفه للنشر النهائي */
+    .loyalty-reset {
+      margin-top: 12px;
+      font-family: inherit;
+      font-size: .76rem;
+      color: var(--c-metal);
+      background: transparent;
+      border: 1px dashed var(--c-metal);
+      border-radius: 8px;
+      padding: 4px 12px;
+      cursor: pointer;
+    }
+
+    .loyalty-reset:hover { opacity: .7; }
+
+    /* --- د) رسالة في زجاجة 🍾 --- */
+    .bottle { padding: 30px 0 56px; }
+
+    .bottle-card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--c-card);
+      border: 1px solid rgba(var(--c-line-rgb), .2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    /* الزجاجة المرسومة تتراقص يمين ويسار (SVG inline بدون مكتبات) */
+    .bottle-art { display: grid; place-items: center; }
+
+    .bottle-art svg {
+      width: 78px;
+      transform-origin: bottom center;
+      animation: sway 3.8s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-7deg); }
+      50%      { transform: rotate(7deg); }
+    }
+
+    .bottle-form { display: grid; gap: 10px; }
+
+    .bottle-form textarea {
+      font-family: inherit;
+      font-size: .95rem;
+      color: var(--c-ink);
+      background: var(--c-paper-2);
+      border: 2px dashed rgba(var(--c-line-rgb), .45);
+      border-radius: 12px;
+      padding: 12px 14px;
+      resize: vertical;
+      min-height: 86px;
+      outline: none;
+      transition: border-color .2s ease, border-style .2s ease;
+    }
+
+    .bottle-form textarea:focus {
+      border-color: var(--c-coffee);
+      border-style: solid;
+    }
+
+    .bottle-hint { font-size: .82rem; color: var(--c-soft); min-height: 1.3em; }
+
+    .bottle-hint.err { color: #b23b2e; font-weight: 800; }
+
+    .bottle-form .btn { justify-self: start; }
+
+    /* اهتزاز "الاهتزاز الحزين" لما الزائر يبعت زجاجة فاضية 😅 */
+    .bottle-card.shake { animation: shake .45s ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: none; }
+      25%      { transform: translateX(6px) rotate(1deg); }
+      50%      { transform: translateX(-6px) rotate(-1deg); }
+      75%      { transform: translateX(4px); }
+    }
+
+    /* =========================================================
+       (13) تجاوب الشاشات الأكبر (كما هي Mobile-first أولاً)
+       ========================================================= */
+    @media (min-width: 700px) {
+      .about-grid { grid-template-columns: 1fr 1fr; }
+      .about-media { min-height: 340px; }
+      .features { grid-template-columns: repeat(4, 1fr); }
+      .location-grid { grid-template-columns: 1fr 1fr; }
+      .brand-name { font-size: 1.25rem; }
+      .loyalty-slots { grid-template-columns: repeat(9, 1fr); }
+      .bottle-card { grid-template-columns: 110px 1fr; align-items: center; }
+    }
+
+    /* احترام "تقليل الحركة" — للي بيقدّم إعدادات وصولية بنظامه */
+    @media (prefers-reduced-motion: reduce) {
+      .ticker-track, .steam, .stamp, .open-badge::before,
+      .bottle-art svg, .loyalty-slot.pop, .hbtn.playing { animation: none; }
+      .reveal { transition: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- الشريط الذي يبيّن تقدّم التمرير في الصفحة (يُحدَّث من JavaScript) -->
+  <div id="progress" aria-hidden="true"></div>
+
+  <!-- ==================== الهيدر + شارة الحالة الحية + أدوات ======= -->
+  <header>
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-seal" id="sealChar">…</div>
+        <!-- الشعار النصي — يقرأ من إعدادات JS -->
+        <span class="brand-name" id="brandName">…</span>
+      </div>
+
+      <!-- أزرار صغيرة: أجواء صوتية ☕ + الوضع الليلي 🌙 + شارة الحالة -->
+      <div class="header-tools">
+        <!-- زر الصوت Web Audio: يعمل هدير عشوائية بدون ملفات صوتية -->
+        <button class="hbtn" id="soundBtn" aria-label="أجواء الكافيه الصوتية" title="أجواء الكافيه الصوتية">🔇</button>
+        <!-- زر الوضع الليلي: يقلب ألوان الموقع شوكولاتة وذهب -->
+        <button class="hbtn" id="themeBtn" aria-label="الوضع الليلي" title="الوضع الليلي / النهاري">🌙</button>
+        <!-- شارة "مفتوح الآن / مسكر حالياً" — تتحسب من ساعات الدوام -->
+        <span class="open-badge" id="openBadge">…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== الشريط المتحرك (Ticker) ==================== -->
+  <!-- النص بيتولّد من إعدادات JS — نسخة واحدة تكفي، والكود يكررها للدورة -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <main>
+
+    <!-- ==================== الهيرو: الكوب المرسوم + البخار ==================== -->
+    <section class="hero">
+      <div class="container">
+
+        <!-- 📷 [بديل الصورة] المنصة اللي تحتها هي "الصورة".
+             لو بدك صورة حقيقية: حطها كخلفية داخل .hero-stage
+             وشيل .cup-scene كلياً. -->
+        <div class="hero-stage reveal">
+          <!-- 📷 [بديل الصورة] المنصة اللي تحتها هي "الصورة".
+               لو بدك صورة حقيقية: حطها كخلفية داخل .hero-stage
+               وشيل .cup-scene كلياً. -->
+          <div class="cup-scene" aria-hidden="true">
+            <!-- حروف ديكور خلفية -->
+            <span class="cup-deco d1">☕</span>
+            <span class="cup-deco d2">قهوة</span>
+            <!-- البخار: 3 فصوص بترتفع (الحركة أصلاً CSS) -->
+            <span class="steam"></span>
+            <span class="steam"></span>
+            <span class="steam"></span>
+            <!-- الكوب نفسه + الصحن -->
+            <div class="cup"></div>
+            <div class="saucer"></div>
+          </div>
+        </div>
+
+        <!-- الاسم الرئيسي — يملؤه من JS -->
+        <h1 id="heroName" class="reveal">…</h1>
+
+        <!-- موجة تزيينية صغيرة (SVG inline — بدون مكتبات) -->
+        <svg class="hero-wave" width="140" height="14" viewBox="0 0 140 14" fill="none" aria-hidden="true">
+          <path d="M2 7 Q 12 1 22 7 T 42 7 T 62 7 T 82 7 T 102 7 T 122 7 T 138 7"
+                stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <p class="reveal">
+          قهوة مختصة، حلويات تُخبز كل صباح في مطبخنا، وجوّ هادئ
+          يشبه ما شربت أبداً. اجلس، ارتاح، وانتظر الكوب يوصلك ساخناً.
+        </p>
+
+        <div class="hero-actions reveal">
+          <!-- زر الواتساب الرئيسي — الرابط يبنى من JS برسالة جاهزة -->
+          <a class="btn btn-wa js-wa-general" href="#" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.45-4.4-1.22l-.32-.19-3.05.8.82-2.97-.2-.33A8.2 8.2 0 1 1 12 20.2Zm4.58-6.1c-.25-.13-1.48-.73-1.7-.81-.23-.09-.4-.13-.56.12-.17.25-.65.8-.8.97-.14.16-.29.18-.54.06a6.7 6.7 0 0 1-1.97-1.22 7.4 7.4 0 0 1-1.36-1.7c-.14-.25-.01-.39.11-.51.11-.11.25-.3.37-.45.12-.15.16-.25.25-.42.08-.16.04-.3-.02-.42-.06-.13-.56-1.35-.77-1.84-.2-.48-.4-.42-.56-.43l-.47-.01c-.17 0-.44.06-.66.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.74 2.65 4.2 3.72.59.25 1.05.4 1.4.52.59.18 1.13.16 1.55.1.47-.07 1.48-.6 1.68-1.19.21-.59.21-1.08.15-1.19-.06-.1-.23-.16-.48-.29Z"/>
+            </svg>
+            اطلب عبر واتساب
+          </a>
+          <!-- زر ثانوي ينزل بالمستخدم للمنيو كي يجرب السلة -->
+          <a class="btn btn-ghost" href="#menu">🧾 شوف المنيو وسلّة</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== نبذة عنّا + الختم الدائري ==================== -->
+    <section class="about" id="about">
+      <div class="container">
+        <h2 class="section-title reveal">نبذة عنّا</h2>
+        <p class="section-sub reveal">القصة القصيرة اللي وراء كل كوب</p>
+
+        <div class="about-grid">
+          <!-- 📷 [هنا تضع صورة القصة] — الخامة اللي تحت هي بديل مؤقت.
+               استبدلها بصورة واجهة المحل أو الفريق (خلفية CSS). -->
+          <div class="about-media reveal">
+            <!-- ختم دائري بيتحرك حلّاق — مرسوم SVG بدون مكتبات -->
+            <svg class="stamp" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="stamp-ring" cx="60" cy="60" r="56"/>
+              <circle class="stamp-ring" cx="60" cy="60" r="30" stroke-dasharray="4 4"/>
+              <!-- المركز: فنجان بسيط مرسوم -->
+              <g class="stamp-center">
+                <rect x="50" y="52" width="22" height="16" rx="5"/>
+                <path d="M72 54 h6 a5 5 0 0 1 0 11 h-6" fill="none" stroke="#4a2c18" stroke-width="3"/>
+              </g>
+              <!-- النص على دائرة: بمسار مسار دائري -->
+              <defs>
+                <path id="stampPath" d="M60,60 m-43,0 a43,43 0 1,1 86,0 a43,43 0 1,1 -86,0"/>
+              </defs>
+              <text>
+                <textPath href="#stampPath">☕ قهوة طازجة يومياً • حلويات بيت الصنع • أجواء هادئة ☕</textPath>
+              </text>
+            </svg>
+            <!-- تعليق يقولك وين تحط الصورة -->
+            <span class="media-note">📷 حط هنا صورة واجهة المحل</span>
+          </div>
+
+          <div class="about-content reveal">
+            <p>
+              بدأنا بفكرة وحدة: أنك تحس إنك في مكانك من أول رشفة.
+              حبوب مختارة بعناية، تحميص متوازن، حليب مرغّي
+              بيد باريستا متمكن، وحلويات تُوصل من المطبخ كل صباح.
+            </p>
+            <p>
+              نتجنّب التكلفة الزائدة ونستهلك وقتنا بالمهم: جودة الكوب،
+              نظافة المكان، وابتسامة صادقة عند الباب.
+            </p>
+
+            <!-- مميزات سريعة (كروت ترتد لما تحرك عليها) -->
+            <div class="features">
+              <div class="feature"><b>☕ مختصة</b><small>حبوب محمصة طازج</small></div>
+              <div class="feature"><b>🍰 يومية</b><small>حلويات من مطبخنا</small></div>
+              <div class="feature"><b>🪑 هادئة</b><small>مثالية للدراسة</small></div>
+              <div class="feature"><b>📶 واي فاي</b><small>سريع ومجاني</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== المنيو: الفاتورة الحية 🧾 ==================== -->
+    <section class="menu" id="menu">
+      <div class="container">
+        <h2 class="section-title reveal">المينيو</h2>
+        <p class="section-sub reveal">اضغط + على أي صنف ينضاف للفاتورة تحت — وابعتها كلها واتساب</p>
+
+        <!-- ورقة الفاتورة: الصفوف تبنى من JS حسب مصفوفة menuItems -->
+        <div class="receipt reveal">
+          <div class="receipt-head">
+            <h2>☕ فاتورة اليوم ☕</h2>
+            <p id="receiptSub">…</p>
+          </div>
+
+          <!-- لستة الأصناف (تتلج من JS) -->
+          <div id="menuRows"></div>
+
+          <!-- سطر المجموع الحي (يظهر لما تضيف أصناف) -->
+          <div class="receipt-total" id="receiptTotal">
+            <span>المجموع الحي 🧮</span>
+            <span id="receiptTotalVal">0</span>
+          </div>
+
+          <!-- تلميح لما السلة فاضية -->
+          <div class="cart-empty-hint" id="cartHint">
+            👆 اظغط "+" جنب أي صنف — والفاتورة بتحسب لحالها
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== بطاقة الولاء 🎟️ ==================== -->
+    <!-- كل طلب يُرسل عبر الموقع = ختم ☕ جديد على البطاقة.
+         العلامات تُحفظ في localStorage — تجي مرة ثانية وتلقى بطاقتك فيها!
+         لما تكتمل (loyaltyGoal من إعدادات JS) تنفتح الهدية. -->
+    <section class="loyalty" id="loyalty">
+      <div class="container">
+        <h2 class="section-title reveal">بطاقة الولاء 🎟️</h2>
+        <p class="section-sub reveal">كل طلب تبعتّه عبر الموقع يختم بطاقتك. أختام كاملة = قهوة علينا</p>
+
+        <!-- الكرت: يبنى تلقائيًا من JS حسب loyaltyGoal -->
+        <div class="loyalty-card reveal">
+          <div class="loyalty-slots" id="loyaltySlots"></div>
+          <p class="loyalty-status" id="loyaltyStatus">…</p>
+
+          <!-- زر الاسترداد: يظهر فقط لما البطاقة تكتمل -->
+          <a class="btn btn-wa loyalty-redeem" id="loyaltyRedeem" href="#" target="_blank" rel="noopener">
+            🎉 استبدل هديّتي علينا!
+          </a>
+
+          <!-- ⚠️ زر التفريغ: أداة تجربة/تطوير فقط —
+               احذفه أو علّق عليه قبل النشر الحقيقي -->
+          <button class="loyalty-reset" id="loyaltyReset" title="يتصفّر بطاقة الولاء للتجربة">
+            تفريغ البطاقة (تجربة)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== الدوام والموقع ==================== -->
+    <section class="location" id="location">
+      <div class="container">
+        <h2 class="section-title reveal">الدين والمكان</h2>
+        <p class="section-sub reveal">استقبلك عمر ما يتوقف — وشفت شارة "مفتوح الآن" بالهيدر؟ تتحسب لحالها من ساعة جهازك 😉</p>
+
+        <div class="location-grid">
+          <!-- كرت الدوام: النص يقرأ من JS + شارة داخلية -->
+          <div class="loc-card reveal">
+            <h3>⏰ ساعات الدوام</h3>
+            <p id="workHours">…</p>
+            <p><strong id="openBadge2">…</strong></p>
+            <small>بالمناسبات والأعياد بنعلن هنا وبصفحتنا على السوشال ميديا.</small>
+          </div>
+
+          <!-- كرت العنوان: النص + رابط خرائط جوجل (بحث نصي بدون إحداثيات) -->
+          <div class="loc-card reveal">
+            <h3>📍 العنوان</h3>
+            <p id="shopAddress">…</p>
+            <p style="margin-top:10px;">
+              <a id="mapLink" href="#" target="_blank" rel="noopener">افتح على خرائط جوجل ←</a>
+            </p>
+          </div>
+        </div>
+
+        <!-- 📷 [هنا تضع صورة الخريطة أو مدخل المحل] — النمط اللي تحت هو البديل المؤقت -->
+        <div class="map-ph reveal">
+          <span>📷 [ضع هنا صورة الخريطة أو صورة واجهة المدخل]<br>البديل المؤقت: نقش شبكة نقاط</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== رسالة في زجاجة 🍾 ==================== -->
+    <!-- بدل صندوق اقتراحات اللاند: تكتب رسالتك وتشُتغله داخل زجاجة،
+         وتضغط "أغلق الزجاجة" → تُرسل عبر واتساب برسالة تمثيّله يقول
+         المدير "وصلت زجاجة من الموقع!" -->
+    <section class="bottle" id="bottle">
+      <div class="container">
+        <h2 class="section-title reveal">رسالة في زجاجة 🍾</h2>
+        <p class="section-sub reveal">اقتراح، فكرة، دعوة جميلة — إياكي بالزجاجة ونخليها تصلك لمدير المحل</p>
+
+        <div class="bottle-card reveal" id="bottleCard">
+          <!-- 📷 [بديل الصورة]: زجاجة مُرسمة تتراقص (SVG بدون مكتبات) —
+               استبدلها بصورة حقيقية إذا رغبت (خلفية داخل .bottle-art) -->
+          <div class="bottle-art" aria-hidden="true">
+            <svg viewBox="0 0 60 140" fill="none">
+              <!-- عنق الزجاجة -->
+              <path d="M26 4 h8 v26 q-8 6 -8 12 v80 a10 10 0 0 0 20 0 v-80 q0-6 -8-12 Z"
+                    fill="var(--c-foam)" opacity=".35"/>
+              <path d="M26 4 h8 v26 q-8 6 -8 12 v80 a10 10 0 0 0 20 0 v-80 q0-6 -8-12 Z"
+                    stroke="var(--c-coffee)" stroke-width="3"/>
+              <!-- رسالة ملفوفة داخلها (رقاقة) -->
+              <rect x="24" y="66" width="18" height="52" rx="3" fill="var(--c-card)"
+                    stroke="var(--c-metal)" stroke-width="2"
+                    transform="rotate(4 33 92)"/>
+              <!-- ختم صغير على الرسالة -->
+              <circle cx="36" cy="76" r="3" fill="var(--c-coffee)"/>
+              <!-- فُتح الزجاجة: قلعة -->
+              <circle cx="53" cy="118" r="4" fill="var(--c-coffee)"/>
+            </svg>
+          </div>
+
+          <div class="bottle-form">
+            <!-- حقل الرسالة: يفرغ تلقائيًا بعد الإرسال -->
+            <textarea id="bottleText" rows="3"
+                      placeholder="اكتب رسالتك… ننشرها سرّاً بيننا 😄"></textarea>
+
+            <!-- زر الإغلاق والإرسال: يبعت محتوى الزجاجة عبر واتساب -->
+            <button class="btn btn-wa" id="bottleSend">📮 أغلق الزجاجة وابعثها</button>
+
+            <!-- تلميح متغير برسالة الحالة (فاضية؟ انطلقت؟) -->
+            <p class="bottle-hint" id="bottleHint"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== الفوتر ==================== -->
+  <footer>
+    <div class="container">
+      <div class="brand">
+        <div class="brand-seal" id="sealCharFooter">…</div>
+        <span id="footerName">…</span>
+      </div>
+      <p id="footerHours">…</p>
+      <p style="font-size:.78rem; opacity:.7;">كل الحقوق محفوظة © <span id="year"></span></p>
+    </div>
+  </footer>
+
+  <!-- ==================== درج السلة (يطلع من تحت) ==================== -->
+  <!-- الخلفية المعتمة: ضغط عليها يقفل الدرج -->
+  <div class="cart-backdrop" id="cartBackdrop"></div>
+
+  <!-- الدرج نفسه: لستة الأصناف + المجموع + زر إرسال واتساب -->
+  <aside class="cart-drawer" id="cartDrawer" aria-label="سلة الطلب">
+    <div class="cart-head">
+      <h3>🛒 فاتورة طلبك</h3>
+      <button class="cart-close" id="cartClose" aria-label="إغلاق السلة">✕</button>
+    </div>
+    <div class="cart-body" id="cartBody">
+      <!-- حالتها الفاضية الافتراضية (تُستبدل تلقائياً بإضافة أول صنف) -->
+      <div class="cart-empty" id="cartEmptyState">
+        <span>🕳️</span>
+        الفاتورة لسا فاضية…<br>ارجع للمنيو واضغط "+" على أي صنف
+      </div>
+      <!-- الأصناف المضافة تبنى هنا من JS -->
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-total-row">
+        <span>المجموع</span>
+        <span id="cartTotalVal">0</span>
+      </div>
+      <!-- زر الإرسال: يفتح واتساب برسالة فيها تفاصيل الطلب كاملة -->
+      <a class="btn btn-wa cart-send" id="cartSend" href="#" target="_blank" rel="noopener">
+        📤 أرسل الطلب عبر واتساب
+      </a>
+    </div>
+  </aside>
+
+  <!-- ==================== زر الواتساب العائم + عداد السلة ==================== -->
+  <!-- الضغط عليه: إما يفتح درج السلة (لو فيها أصناف) أو يبعت رسالة عامة (لو فاضية) -->
+  <button class="wa-float" id="waFloat" aria-label="سلة الطلب / تواصل واتساب">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.45-4.4-1.22l-.32-.19-3.05.8.82-2.97-.2-.33A8.2 8.2 0 1 1 12 20.2Zm4.58-6.1c-.25-.13-1.48-.73-1.7-.81-.23-.09-.4-.13-.56.12-.17.25-.65.8-.8.97-.14.16-.29.18-.54.06a6.7 6.7 0 0 1-1.97-1.22 7.4 7.4 0 0 1-1.36-1.7c-.14-.25-.01-.39.11-.51.11-.11.25-.3.37-.45.12-.15.16-.25.25-.42.08-.16.04-.3-.02-.42-.06-.13-.56-1.35-.77-1.84-.2-.48-.4-.42-.56-.43l-.47-.01c-.17 0-.44.06-.66.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.74 2.65 4.2 3.72.59.25 1.05.4 1.4.52.59.18 1.13.16 1.55.1.47-.07 1.48-.6 1.68-1.19.21-.59.21-1.08.15-1.19-.06-.1-.23-.16-.48-.29Z"/>
+    </svg>
+    <span class="cart-badge" id="cartBadge">0</span>
+  </button>
+
+  <script>
+    /* =========================================================
+       (1) ⚙️ إعدادات JavaScript — كل التعدين هنا. عدّل القيم فقط.
+       (القيم نفسها متزامنة مع متغيرات CSS اللي فوق)
+       ========================================================= */
+
+    // اسم المحل (يظهر بالهيرو والفوتر)
+    const shopName = "كافيه الركن الهادئ";
+
+    // الشعار النصي (مفتاح ختم الهيدر ياخد أول حرف منه تلقائياً)
+    const logoText = "☕ ركن هادئ";
+
+    // رقم الواتساب — بصيغة دولية بدون "+" وبدون أصفار بادئة.
+    // ⚠️ استبدل الـ X بأرقام حقيقية قبل النشر (مثال: "970599123456")
+    const whatsappNumber = "970XXXXXXXXX";
+
+    // رسالة الاستفسار العامة (لما زر واتساب يضغط وهو ما في سلة)
+    const generalMessage = "مرحباً 👋 أود الاستفسار عن المنيو وعن الطلبات.";
+
+    // العنوان (نص) — يُستخدم أيضاً في رابط خرائط جوجل
+    const shopAddress = "شارع المعارض — مقابل الحدائق العامة";
+
+    // ساعات الدوام (نص يظهر للمستخدم)
+    const workHours = "يوميًا: 8 صباحًا — 12 منتصف الليل";
+
+    // ⏱️ ساعات الدوام الرقمية (لحساب "مفتوح الآن" حقيقةً عبر الحاسوب):
+    // openHour = ساعة الافتتاح (24ساعة)، closeHour = ساعة الإغلاق (24 = منتصف الليل)
+    const openHour = 8;
+    const closeHour = 24;
+
+    // العملة (تظهر جنب الأسعار في كل مكان)
+    const currency = "₪";
+
+    /* --- 🎟️ إعدادات بطاقة الولاء --- */
+    // كم ختم يحتاج البطاقة حتى تكتمل؟ (ختم واحد مع كل طلب يُرسل)
+    const loyaltyGoal = 9;
+
+    /* --- 🍾 إعدادات رسالة الزجاجة --- */
+    // جملة التوقيع اللي توصل قبل نص الزائر (تخبر المدير "جاءت زجاجة")
+    const bottlePreamble = "📩 تم! وصلت زجاجة جديدة من الموقع:";
+
+    // كلمات الشريط المتحرك (Ticker) — أضف/احذف بحرية
+    const tickerItems = [
+      "☕ قهوة مختصة",
+      "🍰 حلويات طازجة يومياً",
+      "🪑 أجواء هادئة",
+      "📶 واي فاي سريع",
+      "🛒 اطلب من المنيو مباشرة عبر واتساب",
+      "⏰ يومياً 8ص — 12ص",
+    ];
+
+    /* --- قائمة المنيو: (اسم — وصف — سعر) --- */
+    /* 💡 لتعديل المنيو: أضف/احذف/عدّل عناصر هالمصفوفة وستتحدث
+          ورقة الفاتورة والسلة تلقائياً — ما فيها شغل إضافي. */
+    const menuItems = [
+      { name: "اسبريسو",             desc: "شوت مركّز من حبوب محمصة طازج",        price: 12 },
+      { name: "كابتشينو",            desc: "اسبريسو مع حليب مرغي وطبقة كريمة",     price: 15 },
+      { name: "لاتيه فانيليا",       desc: "لاتيه ناعم بنكهة فانيليا طبيعية",      price: 17 },
+      { name: "قهوة تركية",          desc: "تُعد على الرمل بالطريقة التقليدية",     price: 10 },
+      { name: "شاي بالنعنع",         desc: "شاي أخضر طازج مع أوراق نعنع",          price: 8  },
+      { name: "آيس لاتيه",           desc: "لاتيه مثلّج وغطوة قرفة خفيفة",         price: 16 },
+      { name: "تشيز كيك",            desc: "قطعة باردة على قاعدة بسكويت",          price: 18 },
+      { name: "براوني بالآيس",       desc: "براوني سخن مع كرة آيس كريم فانيليا",   price: 20 },
+    ];
+
+    /* =========================================================
+       لا تعدّل تحت هذا السطر إلا إذا فهمت الكود.
+       الكود يطبّق كل الإعدادات تلقائياً.
+       ========================================================= */
+
+    // ---- أدوات صغيرة ----
+    const $ = (id) => document.getElementById(id);
+
+    // تستخرج "أول حرف مهم" من الشعار عشان الختم الدائري
+    function firstChar(str) {
+      // شيلون المشاريع (☕ مثلاً) والفراغات — وناخل أول حرف عربي/لاتيني
+      const clean = str.replace(/[\u{1F300}-\u{1FAFF}\s]/gu, "");
+      return clean.charAt(0) || "☕";
+    }
+
+    // تنسيق السعر (مثال: 12 ₪)
+    const fmt = (n) => n + " " + currency;
+
+    // ---- رابط واتساب عام (رسالة جاهزة) ----
+    const generalWaLink =
+      "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(generalMessage);
+
+    // ---- حقن نصوص الإعدادات في الصفحة ----
+    $("brandName").textContent = logoText;
+    $("footerName").textContent = shopName;
+    $("heroName").textContent = shopName;
+    $("sealChar").textContent = firstChar(logoText);        // حرف الختم بالهيدر
+    $("sealCharFooter").textContent = firstChar(shopName);  // حرف ختم الفوتر
+    $("workHours").textContent = workHours;
+    $("shopAddress").textContent = shopAddress;
+    $("footerHours").textContent = workHours;
+    $("receiptSub").textContent = "الأصناف تقابل الطلب • " + fmt(menuItems[0]?.price || 0) + " وما فوق";
+    $("year").textContent = new Date().getFullYear();
+
+    // رابط خرائط جوجل: بحث نصي بالاسم + العنوان (بدون إحداثيات مختلاقة)
+    $("mapLink").href =
+      "https://www.google.com/maps/search/?api=1&query=" +
+      encodeURIComponent(shopName + " " + shopAddress);
+
+    // جميع أزرار "واتساب عام" (زر الهيرو) ياخدون الرابط الجاهز
+    document.querySelectorAll(".js-wa-general").forEach((el) => (el.href = generalWaLink));
+
+    /* ---- حساب حالة "مفتوح الآن" من ساعات الدوام الرقمية ---- */
+    function calcOpen() {
+      const h = new Date().getHours();       // الساعة الحالية (0–23)
+      // لو الافتتاح أصغر من الإغلاق: نطاق عادي (مثلاً 8→24)
+      return h >= openHour && h < closeHour;
+    }
+
+    function paintOpenBadges() {
+      const isOpen = calcOpen();
+      const badge1 = $("openBadge");
+      const badge2 = $("openBadge2");
+      badge1.textContent = isOpen ? "مفتوح الآن" : "مسكر حالياً";
+      badge1.classList.add(isOpen ? "is-open" : "is-closed");
+      badge2.textContent = isOpen
+        ? "✅ نستقبلك الآن"
+        : "🌙 مسكر — راجع ساعات الدوام فوق";
+      badge2.style.color = isOpen ? "#1e7d43" : "#b23b2e";
+    }
+    paintOpenBadges();                    // أول ما الصفحة تجهز
+    setInterval(paintOpenBadges, 60000);  // يعيد الفحص كل دقيقة حتى تبقى الحالة صحيحة
+
+    /* ---- بناء الشريط المتحرك (Ticker) ----
+       نكرر المحتوى مرتين ورا بعض عشان الدورة (animation translateX -50%)
+       تكون مستمرة بدون فرقات. */
+    const tickerHTML = tickerItems.map((t) => "<span>" + t + " ✦</span>").join("");
+    $("tickerTrack").innerHTML = tickerHTML + tickerHTML;
+
+    /* =========================================================
+       (2) 🛒 منطق السلة — الفاتورة الحية
+       cart: خريطة { اسم الصنف → الكمية }
+       ========================================================= */
+    const cart = {};   // كل الصنف مسجل باسمه
+
+    // بناء صفوف المنيو داخل "الفاتورة"
+    function buildMenu() {
+      $("menuRows").innerHTML = menuItems
+        .map(
+          (it, i) => `
+        <div class="menu-row">
+          <div class="menu-row-info">
+            <h3>${it.name}</h3>
+            <p>${it.desc}</p>
+          </div>
+          <span class="menu-row-price">${fmt(it.price)}</span>
+          <button class="add-btn" data-i="${i}" aria-label="أضف ${it.name} للسلة">+</button>
+        </div>`
+        )
+        .join("");
+    }
+    buildMenu();
+
+    // مجموع قيمة السلة (كمية × سعر لكل صنف)
+    function cartTotal() {
+      return menuItems.reduce((sum, it) => sum + (cart[it.name] || 0) * it.price, 0);
+    }
+
+    // عدد الوحدات الكلي بالسلة (عشان قمة العداد)
+    function cartCount() {
+      return Object.values(cart).reduce((a, b) => a + b, 0);
+    }
+
+    // تحديث كل واجهات السلة (الفاتورة + العداد + الدرج)
+    function refreshCart() {
+      const total = cartTotal();
+      const count = cartCount();
+
+      // ← قمة العداد فوق الزر العائم
+      const badge = $("cartBadge");
+      badge.textContent = count;
+      badge.classList.toggle("show", count > 0);
+      if (count > 0) {
+        badge.classList.remove("bump");
+        void badge.offsetWidth;        // حيلة: إعادة تشغيل الـ animation
+        badge.classList.add("bump");
+      }
+
+      // ← سطر المجموع داخل ورقة الفاتورة
+      const totalRow = $("receiptTotal");
+      totalRow.classList.toggle("show", total > 0);
+      $("receiptTotalVal").textContent = fmt(total);
+      $("cartHint").style.display = total > 0 ? "none" : "block";
+
+      // ← جسم درج السلة (لستة الأصناف المضافة)
+      const body = $("cartBody");
+      if (count === 0) {
+        body.innerHTML = `
+          <div class="cart-empty">
+            <span>🕳️</span>
+            السلة لسا فاضية…<br>رجع للمنيو واضغط "+" على أي صنف
+          </div>`;
+        $("cartFooter").style.display = "none";
+      } else {
+        body.innerHTML = menuItems
+          .filter((it) => cart[it.name] > 0)
+          .map(
+            (it) => `
+          <div class="cart-item">
+            <span class="cart-item-name">${it.name}</span>
+            <span class="qty-controls">
+              <button class="qty-btn" data-minus="${it.name}" aria-label="قلل كمية ${it.name}">−</button>
+              <b>${cart[it.name]}</b>
+              <button class="qty-btn" data-plus="${it.name}" aria-label="زد كمية ${it.name}">+</button>
+            </span>
+            <span class="cart-item-sum">${fmt(cart[it.name] * it.price)}</span>
+          </div>`
+          )
+          .join("");
+        $("cartFooter").style.display = "block";
+        $("cartTotalVal").textContent = fmt(total);
+      }
+    }
+
+    // ضغط "+" داخل الفاتورة (مسند عبر تفويض الأحداث — Event Delegation)
+    $("menuRows").addEventListener("click", (e) => {
+      const btn = e.target.closest(".add-btn");
+      if (!btn) return;
+      const item = menuItems[btn.dataset.i];
+      cart[item.name] = (cart[item.name] || 0) + 1;
+      refreshCart();
+    });
+
+    // أزرار +/− داخل درج السلة
+    $("cartBody").addEventListener("click", (e) => {
+      const plus = e.target.closest("[data-plus]");
+      const minus = e.target.closest("[data-minus]");
+      if (plus)  { cart[plus.dataset.plus]++;  refreshCart(); }
+      if (minus) {
+        const n = cart[minus.dataset.minus] - 1;
+        if (n <= 0) delete cart[minus.dataset.minus];
+        else cart[minus.dataset.minus] = n;
+        refreshCart();
+      }
+    });
+
+    /* ---- فتح/إغلاق درج السلة ---- */
+    const drawer = $("cartDrawer");
+    const backdrop = $("cartBackdrop");
+
+    function openCart()  { drawer.classList.add("open");  backdrop.classList.add("show"); }
+    function closeCart() { drawer.classList.remove("open"); backdrop.classList.remove("show"); }
+
+    // الزر العائم: لو السلة فيها أصناف → يفتح السلة، وإلا → واتساب عام
+    $("waFloat").addEventListener("click", () => {
+      if (cartCount() > 0) openCart();
+      else window.open(generalWaLink, "_blank");
+    });
+
+    $("cartClose").addEventListener("click", closeCart);
+    backdrop.addEventListener("click", closeCart);
+
+    // ضغط Esc يقفل السلة (وصولية)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeCart();
+    });
+
+    /* ---- بناء رسالة الطلب وتحديث زر الإرسال ----
+       كل تغيير بالسلة = يتبدل رابط زر الإرسال حتى جديد برسالة محدثة. */
+    function updateSendLink() {
+      const total = cartTotal();
+      if (total === 0) { $("cartSend").href = generalWaLink; return; }
+
+      const lines = menuItems
+        .filter((it) => cart[it.name] > 0)
+        .map((it) => "• " + it.name + " ×" + cart[it.name] + " = " + fmt(cart[it.name] * it.price));
+
+      const msg =
+        "☕ طلب جديد من " + shopName + ":\n" +
+        lines.join("\n") +
+        "\n💰 المجموع: " + fmt(total) +
+        "\n\n(وجدت الأصناف عبر الموقع)";
+      $("cartSend").href = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(msg);
+    }
+
+    // نجعل refreshCart تُحدّث الرابط أيضاً — نلفها بالدالة الأصلية
+    const _refresh = refreshCart;
+    refreshCart = function () { _refresh(); updateSendLink(); };
+    refreshCart();
+
+    /* =========================================================
+       (4) 🌗 الميزات الجديدة — الوضع الليلي ☀️ / الصوت 🔊 /
+           الزجاجة 🍾 / بطاقة الولاء 🎟️
+       ========================================================= */
+
+    /* ---- أ) الوضع الليلي ☀️/🌙 ----
+       - يُحفظ خيار الزائر في localStorage فيبقى بين الزيارات
+       - لو الزائر ما اختار شي قبل: نبدأ ليلي وقت الإغلاق ونهاري وقت الفتح
+         (نستعمل نفس حساب "مفتوح الآن" اللي فوق) */
+    const themeBtn = $("themeBtn");
+    const savedTheme = localStorage.getItem("crn-theme");
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      // الأيقونة تقترح الوضع الآخر (القمر → اضغط → نهار)
+      themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+    }
+
+    // الاختيار الأول: المخزّن، وإلا نعتمد على حالة المكان (مفتوح/مسكر)
+    applyTheme(savedTheme || (calcOpen() ? "light" : "dark"));
+
+    themeBtn.addEventListener("click", () => {
+      const next =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      applyTheme(next);
+      localStorage.setItem("crn-theme", next);   // نحفظ اختياره
+    });
+
+    /* ---- ب) أجواء الكافيه الصوتية 🔊 ----
+       صوت مُولَّد بالكامل بـ Web Audio API — بدون أي ملف خارجي:
+         1) "هدير": ضجيج بني عميق مع مرشح منخفض + تمويجات بطيئة
+            = إحساس جليلات وهمهمة الناس حتى لو جرّبنا نسلّم
+         2) "تينغ": نبضة ساين سريعة الخفوت عشوائية
+            = فنجان يسقط على صحنه كل فترة */
+    const soundBtn = $("soundBtn");
+    let audioCtx = null;      // ننشئه فقط عند أول تفاعل (سياسة المتصفحات)
+    let soundOn = false;
+    let ambientNodes = [];    // العقد قيد التشغيل (للإيقاف لاحقاً)
+    let clinkTimer = null;
+
+    // — نحضّر 2 ثانية "ضجيج بني" ونكررهم — كثيف منخفض الومضات
+    function makeNoiseBuffer(ctx) {
+      const length = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < length; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;   // تجمع متسلسل = ضجيج بني
+        data[i] = last * 3.5;
+      }
+      return buffer;
+    }
+
+    // — طقطقة "تينغ" الفنجان — ساين قصير خافت السماع
+    function clink() {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.value = 2400 + Math.random() * 900;   // نبرة عالية
+      gain.gain.setValueAtTime(0.016, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);  // خفوت سريع
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(t); osc.stop(t + 0.55);
+    }
+
+    function startAmbient() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      audioCtx.resume();
+
+      // 1) هدير الخلفية
+      const src = audioCtx.createBufferSource();
+      src.buffer = makeNoiseBuffer(audioCtx);
+      src.loop = true;
+      const lowpass = audioCtx.createBiquadFilter();
+      lowpass.type = "lowpass";
+      lowpass.frequency.value = 480;
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0.05;                        // خافت جداً — ويحس بالجو
+      // "تنفّس": الحجم يتموج ببطء عشان ميبقى ممل وثابت
+      const lfo = audioCtx.createOscillator();
+      lfo.frequency.value = 0.11;                    // موجة كل ~9 ثواني
+      const lfoGain = audioCtx.createGain();
+      lfoGain.gain.value = 0.02;
+      lfo.connect(lfoGain); lfoGain.connect(gain.gain);
+      src.connect(lowpass); lowpass.connect(gain); gain.connect(audioCtx.destination);
+      src.start(); lfo.start();
+      ambientNodes.push(src, lfo);
+
+      // 2) موجة "تينغ" الدورية العشوائية (٤-١٣ ثانية)
+      (function scheduleClink() {
+        clinkTimer = setTimeout(() => {
+          if (soundOn) clink();
+          scheduleClink();
+        }, 4000 + Math.random() * 9000);
+      })();
+    }
+
+    function stopAmbient() {
+      ambientNodes.forEach((n) => { try { n.stop(); } catch (e) {} });
+      ambientNodes = [];
+      clearTimeout(clinkTimer);
+    }
+
+    soundBtn.addEventListener("click", () => {
+      soundOn = !soundOn;
+      if (soundOn) {
+        startAmbient();
+        soundBtn.textContent = "🔊";
+        soundBtn.title = "إسكات أجواء الكافيه";
+        soundBtn.classList.add("playing");
+        soundBtn.setAttribute("aria-pressed", "true");
+      } else {
+        stopAmbient();
+        soundBtn.textContent = "🔇";
+        soundBtn.title = "تشغيل أجواء الكافيه";
+        soundBtn.classList.remove("playing");
+        soundBtn.setAttribute("aria-pressed", "false");
+      }
+    });
+
+    /* ---- ج) رسالة في زجاجة 🍾 ---- */
+    $("bottleSend").addEventListener("click", () => {
+      const text = $("bottleText").value.trim();
+      const hint = $("bottleHint");
+      const card = $("bottleCard");
+
+      // الزجاجة الفاضية؟ اهتز الاهتزاز الحزين 😅
+      if (!text) {
+        hint.textContent = "الزجاجة فاضية! اكتب شي قبل ما تغلقها 🙈";
+        hint.classList.add("err");
+        card.classList.remove("shake");
+        void card.offsetWidth;     // إعادة تشغيل حركة الاهتزاز
+        card.classList.add("shake");
+        return;
+      }
+
+      // الرسالة النهائية: توقيع الزجاجة + نص الزائر (يصل للواتساب)
+      const msg = bottlePreamble + "\n\n" + text + "\n\n(مرسلة عبر زجاجة الموقع 🍾)";
+      window.open(
+        "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(msg),
+        "_blank"
+      );
+
+      // ننظف الزجاجة ونرحب
+      $("bottleText").value = "";
+      hint.textContent = "🌊 انطلقت زجاجتك! راقب واتساب للمطعم — الموج رايح في طريقه.";
+      hint.classList.remove("err");
+    });
+
+    /* ---- د) بطاقة الولاء 🎟️ ----
+       ختم ☕ جديد مع كل طلب يُرسل عبر زر الإرسال في درج السلة.
+       العلامات تُحفظ في localStorage — تبقى بين الزيارات و حتى الإغلاق. */
+    const STAMPS_KEY = "crn-stamps";                  // مفتاح التخزين
+    let stamps = parseInt(localStorage.getItem(STAMPS_KEY), 10) || 0;
+
+    // رابط استبدال الهدية (اختصار واتساب بصيغة مبتهجة)
+    const redeemMsg = "☕ هلا! بطاقة الولاء عندي اكتملت (" + loyaltyGoal + " أختام) — قهوتي هالمرّة على حسابكم 😄";
+    $("loyaltyRedeem").href =
+      "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(redeemMsg);
+
+    // — رسم البطاقة: خانة كل ختم، الممتلئ يظهر فيها فنجان
+    function renderLoyalty(popIndex) {
+      const slotsEl = $("loyaltySlots");
+      let html = "";
+      for (let i = 0; i < loyaltyGoal; i++) {
+        html += i < stamps
+          ? '<div class="loyalty-slot full">☕</div>'
+          : '<div class="loyalty-slot"></div>';
+      }
+      slotsEl.innerHTML = html;
+
+      const status = $("loyaltyStatus");
+      const done = stamps >= loyaltyGoal;
+      if (done) {
+        status.textContent = "🎉 اكتملت البطاقة! القهوة القادمة علينا.";
+        status.classList.add("done");
+        $("loyaltyRedeem").classList.add("show");
+      } else {
+        status.textContent =
+          "لديك " + stamps + " من " + loyaltyGoal + " ختم — " +
+          (loyaltyGoal - stamps) + " وإكملت هدية القهوة ☕";
+        status.classList.remove("done");
+        $("loyaltyRedeem").classList.remove("show");
+      }
+
+      // نبضة احتفال للختم الجديد (إن وجد)
+      if (popIndex !== undefined && slotsEl.children[popIndex]) {
+        slotsEl.children[popIndex].classList.add("pop");
+      }
+    }
+
+    // كل ضغطة على زر "أرسل الطلب" = ختم واحد جديد على البطاقة
+    $("cartSend").addEventListener("click", () => {
+      if (stamps >= loyaltyGoal) return;    // البطاقة مكتملة — تنتظر الاسترداد
+      stamps++;
+      localStorage.setItem(STAMPS_KEY, stamps);
+      renderLoyalty(stamps - 1);            // نبضة احتفال للختم الجديد
+    });
+
+    // الاسترداد: بعد فتح رسالة واتساب نفرّغ البطاقة (الهدية سُحبت)
+    $("loyaltyRedeem").addEventListener("click", () => {
+      setTimeout(resetLoyalty, 600);
+    });
+
+    // تصفير البطاقة (أداة تجربة + تُستعمل بعد الاسترداد)
+    function resetLoyalty() {
+      stamps = 0;
+      localStorage.removeItem(STAMPS_KEY);
+      renderLoyalty();
+    }
+    $("loyaltyReset").addEventListener("click", resetLoyalty);
+
+    renderLoyalty();
+
+    /* =========================================================
+       (3) ✨ التأثيرات العامة
+       ========================================================= */
+
+    /* ---- شريط التقدم أعلى الصفحة ("الحصة") ---- */
+    window.addEventListener("scroll", () => {
+      const h = document.documentElement;
+      const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      $("progress").style.width = pct + "%";
+    }, { passive: true });
+
+    // ---- ظهور العناصر عند التمرير (IntersectionObserver) ----
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.add("seen");
+          io.unobserve(en.target);   // كفى، ما رجعت مخبية
+        }
+      });
+    }, { threshold: .12 });
+
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  </script>
+</body>
+
+</html>
